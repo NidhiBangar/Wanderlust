@@ -1,117 +1,149 @@
 <% layout("/layouts/boilerplate") %>
-<style>
-    #filters{
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-    }
-    .filter{
-        text-align: center;
-        margin-right: 1.5rem;
-        margin-top: 2rem;
-        opacity: 0.7;
-    }
-    .filter:hover{
-        opacity: 1;
-        cursor: pointer;
-    }
-    .filter i {
-        font-size: 1rem;
-    }
-    .tax-info{
-        display: none;
-
-    }
-    .tax-toggle{
-        border: 1px solid black;
-        border-radius: 1rem;
-        height: 3.25rem;
-        padding: 1rem;
-        margin-left: 3rem;
-        display: flex;
-        align-items: center;
-    }
-</style>
-    <div id="filters">
-        <div class="filter">
-            <div><i class="fa-solid fa-fire"></i></div>
-            <p>Trending</p>
-        </div>
-        <div class="filter">
-            <div><i class="fa-solid fa-bed"></i></div>
-            <p>Rooms</p>
-        </div>
-        <div class="filter">
-            <div><i class="fa-solid fa-mountain-city"></i></div>
-            <p>Iconic Cities</p>
-        </div>
-        <div class="filter">
-            <div><i class="fa-solid fa-mountain"></i></div>
-            <p>Mountains</p>
-        </div>
-        <div class="filter">
-            <div><i class="fa-solid fa-water"></i></div>
-            <p>Lakes</p>
-        </div>
-        <div class="filter">
-            <div><i class="fa-brands fa-fort-awesome"></i></div>
-            <p>Castles</p>
-        </div>
-        <div class="filter">
-            <div><i class="fa-solid fa-person-swimming"></i></div>
-            <p>Amazing Pools</p>
-        </div>
-        <div class="filter">
-            <div><i class="fa-solid fa-campground"></i></div>
-            <p>Camping</p>
-        </div>
-        <!-- <div class="filter">
-            <div><i class="fa-solid fa-cow"></i></div>
-            <p>Farms</p>
-        </div> -->
-        <div class="tax-toggle">
-            <div class="form-check-reverse form-switch">
-                <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
-                <label class="form-check-label" for="flexSwitchCheckDefault">Display total after taxes</label>
-              </div>
-        </div>
-    </div>
-
-    <div class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-1 mt-3">
-        <% if (allListings && allListings.length > 0) { %>
-            <% allListings.forEach(function(listing) { %>
-                <a href="/listings/<%= listing._id %>" class="listing-link">
-                    <div class="card col listing-card">
-                        <img src="<%= listing.image.url %>" class="card-img-top" alt="listing_image" style="height: 20rem">
-                        <div class="card-img-overlay"></div>
-                        <div class="card-body">
-                            <p class="card-text">
-                                <b><%= listing.title %></b> <br>
-                                <% if (listing.price != null && listing.price !== undefined) { %>
-                                    &#8377 <%= listing.price.toLocaleString("en-IN") %> /night
-                                    <i class="tax-info">&nbsp; &nbsp; +18% GST</i>
-                                <% } %>
-                            </p>
-                        </div>
-                    </div>
-                </a>
-            <% }); %>
-        <% } else { %>
-            <p>No listings found.</p>
-        <% } %>
-    </div>
-
-<script>
-    let taxSwitch = document.getElementById("flexSwitchCheckDefault");
-    taxSwitch.addEventListener("click",() => {
-        let taxInfo = document.getElementsByClassName("tax-info");
-        for(info of taxInfo){
-            if(info.style.display != "inline"){
-                info.style.display = "inline";
-            }else{
-                info.style.display = "none";
-            }
+    <style>
+        .filter {
+            text-align: center;
+            margin-right: 1.5rem;
+            margin-top: 2rem;
+            opacity: 0.7;
         }
-    });
-</script>
 
+        .filter:hover {
+            opacity: 1;
+            cursor: pointer;
+        }
+
+        .filter i {
+            font-size: 1rem;
+        }
+
+        .tax-info {
+            display: none;
+
+        }
+
+        .filters {
+            border: 1px solid black;
+            border-radius: 1rem;
+            height: 3.25rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .filters>label,
+        input {
+            margin-right: 1rem;
+        }
+
+        .tax-toggle {
+            justify-self: end;
+            width: 30%
+        }
+    </style>
+
+
+    <div style="display:flex; flex-direction: column;">
+        <div class="filters">
+            <label>Price Range: </label>
+            <input placeholder="minimum" id="minimum" />
+            <label>to</label>
+            <input placeholder="maximum" id="maximum" />
+            <input type="button" value="Apply" id="apply-filter" class="btn btn-secondary" />
+            <input type="button" value="Reset" id="reset-filter" class="btn btn-outline-secondary"/>
+            <div class="tax-toggle">
+                <div class="form-check-reverse form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                    <label class="form-check-label" for="flexSwitchCheckDefault">Display total after taxes</label>
+                </div>
+            </div>
+        </div>
+        <div class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-1 mt-3">
+            <% if (allListings && allListings.length> 0) { %>
+                <% allListings.forEach(function(listing) { %>
+                    <a href="/listings/<%= listing._id %>" class="listing-link">
+                        <div class="card col listing-card">
+                            <img src="<%= listing.image.url %>" class="card-img-top" alt="listing_image"
+                                style="height: 20rem">
+                            <div class="card-img-overlay"></div>
+                            <div class="card-body">
+                                <p class="card-text">
+                                    <b>
+                                        <%= listing.title %>
+                                    </b> <br>
+                                <div class="card-price" style="display: none;">
+                                    <%= listing.price %>
+                                </div>
+                                <% if (listing.price !=null && listing.price !==undefined) { %>
+                                    &#8377 <%= listing.price.toLocaleString("en-IN") %> /night
+                                        <i class="tax-info">&nbsp; &nbsp; +18% GST</i>
+                                        <% } %>
+                                            </p>
+                            </div>
+                        </div>
+                    </a>
+                    <% }); %>
+                        <% } else { %>
+                            <p>No listings found.</p>
+                            <% } %>
+        </div>
+    </div>
+
+
+
+
+
+    <script>
+        //Apply Filter click handler
+        let applyButton = document.getElementById("apply-filter");
+        applyButton.addEventListener("click", () => {
+
+            let minimumText = document.getElementById("minimum").value;
+            let minimum = parseFloat(minimumText);
+            if (isNaN(minimum)) minimum = 0;
+            console.log("Minimum Price Filter", minimum)
+
+            let maximumText = document.getElementById("maximum").value;
+            let maximum = parseFloat(maximumText);
+            if (isNaN(maximum)) maximum = 99999999;
+            console.log("Maximum Price Filter", maximum)
+
+            let listingBoxes = document.getElementsByClassName("listing-link");
+            console.log("***** listingBox", listingBoxes);
+            for (listingBox of listingBoxes) {
+                let cardPrice = listingBox.getElementsByClassName("card-price");
+                let price = 0; // this is the price of the property
+                if (cardPrice.length > 0) price = cardPrice[0].innerText;
+                console.log("Card Price", price)
+
+                //apply the pricing filter now
+                if (price < minimum || price > maximum)
+                    listingBox.style.display = "none";
+                else
+                    listingBox.style.display = "inline";
+            }
+        });
+
+        //Reset Filter click handler
+        let resetButton = document.getElementById("reset-filter");
+        resetButton.addEventListener("click", ()=>{
+            document.getElementById("minimum").value = "";
+            document.getElementById("maximum").value = "";
+            applyButton.click();
+        })
+
+
+        //tax switch click handler
+        let taxSwitch = document.getElementById("flexSwitchCheckDefault");
+        taxSwitch.addEventListener("click", () => {
+            let taxInfo = document.getElementsByClassName("tax-info");
+            for (info of taxInfo) {
+                if (info.style.display != "inline") {
+                    info.style.display = "inline";
+                } else {
+                    info.style.display = "none";
+                }
+            }
+        });
+    </script>
