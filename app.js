@@ -1,4 +1,4 @@
-if(process.env.NODE_ENV != "production"){
+if (process.env.NODE_ENV != "production") {
     require('dotenv').config();
 }
 
@@ -32,18 +32,18 @@ main()
         console.log(err);
     });
 
-async function main(){
+async function main() {
     await mongoose.connect(dbUrl);
 }
-app.set("view engine","ejs");
-app.set("views",path.join(__dirname,"views"));
-app.use(express.urlencoded({extended: true}));
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
-app.engine("ejs",ejsMate);
-app.use(express.static(path.join(__dirname,"/public")));
+app.engine("ejs", ejsMate);
+app.use(express.static(path.join(__dirname, "/public")));
 
 const store = MongoStore.create({
-    mongoUrl: dbUrl, 
+    mongoUrl: dbUrl,
     crypto: {
         secret: process.env.SECRET,
     },
@@ -52,7 +52,7 @@ const store = MongoStore.create({
 
 
 store.on("error", () => {
-    console.log("Error in Mongo Session Store!",err);
+    console.log("Error in Mongo Session Store!", err);
 })
 
 const sessionOptions = {
@@ -61,8 +61,8 @@ const sessionOptions = {
     resave: false,
     saveUninitialized: true,
     cookie: {
-        expires: Date.now() + 7*24*60*60*1000,
-        maxAge: 7*24*60*60*1000,
+        expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
         httpOnly: true,
     }
 };
@@ -82,24 +82,31 @@ passport.use(new LocalStratergy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-app.use((req,res,next) => {
+app.use((req, res, next) => {
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
     res.locals.currUser = req.user;
     next();
 });
 
+app.get('/privacy', (req, res) => {
+    res.send('<h1>Privacy Policy</h1><h4>Work in progress.....</h4><h4><a href="/">Back to Home</a></h4>')
+})
+app.get('/terms', (req, res) => {
+    res.send('<h1>Terms & Conditions</h1><h4>Work in progress.....</h4><h4><a href="/">Back to Home</a></h4>')
+})
 
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/", listingRouter);
 
-app.all("*",(req,res,next) => {
-    next(new ExpressError(404,"Page Not Found!"));
+
+app.all("*", (req, res, next) => {
+    next(new ExpressError(404, "Page Not Found!"));
 });
 app.use((err, req, res, next) => {
-    let {statusCode = 500, message = "Something went wrong!"} = err;
-    res.status(statusCode).render("error.ejs",{err});
+    let { statusCode = 500, message = "Something went wrong!" } = err;
+    res.status(statusCode).render("error.ejs", { err });
 });
 app.listen(8080, () => {
     console.log("server is listening to the port 8080");
