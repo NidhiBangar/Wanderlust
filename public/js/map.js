@@ -3,7 +3,7 @@ mapboxgl.accessToken = mapToken;
         container: 'map', // container ID
         style: "mapbox://styles/mapbox/streets-v12",
         center: listing.geometry.coordinates, // starting position [lng, lat]
-        zoom: 9 // starting zoom
+        zoom: 10 // starting zoom
 });
 
 const marker = new mapboxgl.Marker({color:'red'})
