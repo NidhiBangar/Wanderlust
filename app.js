@@ -63,12 +63,11 @@ const sessionOptions = {
     store,
     secret: process.env.SECRET || "fallbacksecret",
     resave: false,
-    saveUninitialized: false, // 🛠 Fix: Don't save empty sessions
+    saveUninitialized: false,
     cookie: {
-        expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // Secure cookies in production
+        secure: process.env.NODE_ENV === "production"
     }
 };
 
