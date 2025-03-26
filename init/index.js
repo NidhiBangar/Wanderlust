@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const initData = require("./data.js");
 const Listing = require("../models/listing.js");
 
-const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
+const MONGO_URL = "mongodb+srv://nidhi:RVLFF6aaXbNCwUDz@cluster0.hqwtfle.mongodb.net/wanderlust?retryWrites=true&w=majority&appName=Cluster0";
 
 async function main() {
     try {
@@ -18,7 +18,15 @@ async function main() {
 async function initDB() {
     try {
         await Listing.deleteMany({});
-        const dataWithOwner = initData.data.map((obj) => ({ ...obj, owner: "6601979ab15c18ac3b7dfabd"}));
+        const dataWithOwner = initData.data.map((obj) => ({ 
+            ...obj, 
+            owner: "67e41ff45af8212770d06e91",
+            // Add default geometry data
+            geometry: {
+                type: "Point",
+                coordinates: [77.2090, 28.6139] // Default coordinates (New Delhi)
+            }
+        }));
         const dataWithValidImage = dataWithOwner.map((obj) => ({
             ...obj,
             image: obj.image // Now 'image' directly holds the URL string

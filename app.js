@@ -20,14 +20,19 @@ const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 
-const dbUrl = process.env.ATLASDB_URL || "mongodb://localhost:27017/your_local_db";
+const dbUrl = process.env.ATLASDB_URL || "mongodb://localhost:27017/wanderlust";
 
+// Improved MongoDB connection with options
 async function connectDB() {
     try {
-        await mongoose.connect(dbUrl);
+        await mongoose.connect(dbUrl, {
+            serverSelectionTimeoutMS: 20000, // Timeout after 20 seconds
+            heartbeatFrequencyMS: 5000,      // Heartbeat frequency
+        });
         console.log("✅ Connected to MongoDB");
     } catch (err) {
         console.error("❌ MongoDB Connection Error:", err);
+        // Don't crash the app, but log the error
     }
 }
 connectDB();
@@ -47,6 +52,12 @@ app.use((req, res, next) => {
     next();
 });
 
+// Set trust proxy for secure cookies in production
+if (process.env.NODE_ENV === "production") {
+    app.set('trust proxy', 1);
+    console.log("✅ Trust proxy enabled for production");
+}
+
 // 🛠 Session Store (MongoDB)
 const store = MongoStore.create({
     mongoUrl: dbUrl,
@@ -63,11 +74,11 @@ const sessionOptions = {
     store,
     secret: process.env.SECRET || "fallbacksecret",
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true, // Save uninitialized sessions
     cookie: {
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production"
+        secure: process.env.NODE_ENV === "production" // Secure in production only
     }
 };
 
@@ -81,10 +92,15 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-// 🛠 Fix: Debugging session persistence
+// Add middleware to handle flash messages and user info
 app.use((req, res, next) => {
-    console.log("👤 Current User from Session:", req.session.passport?.user || "No user");
-    res.locals.currUser = req.user || null;
+    console.log("Session ID:", req.sessionID);
+    console.log("Session:", req.session);
+    console.log("Auth:", req.isAuthenticated() ? "Authenticated" : "Not authenticated");
+    
+    res.locals.success = req.flash("success");
+    res.locals.error = req.flash("error");
+    res.locals.currUser = req.user;
     next();
 });
 
@@ -96,10 +112,10 @@ app.get('/terms', (req, res) => {
     res.send('<h1>Terms & Conditions</h1><h4>Work in progress.....</h4><h4><a href="/">Back to Home</a></h4>');
 });
 
-// 🛠 Fix: Register routes properly
+// 🛠 Route registration
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
-app.use("/", userRouter); // ✅ Used userRouter instead of repeating listingRouter
+app.use("/", userRouter);
 
 // 🛠 Handle 404 errors
 app.all("*", (req, res, next) => {
